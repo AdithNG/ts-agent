@@ -8,7 +8,7 @@ Five agents wired as a `StateGraph`, matching the ECLIPSE paper:
 
 ```
 START → router → contextual_prior → planner → executor → audit → END
-                                        ↑________________________| (REVISE)
+                                        ↑________________________| (REVISE, max 3×)
          ↓ (self-contained QA)
        qa_direct → END
 ```
@@ -19,19 +19,32 @@ START → router → contextual_prior → planner → executor → audit → END
 | `contextual_prior` | Scenario profiler → Temporal Archetype Bank retrieval → Intervention Advisor |
 | `planner` | Synthesizes temporal program Π = (hist\_ops, foundation\_forecast, future\_ops) |
 | `executor` | Runs the tool library against the temporal program |
-| `audit` | Returns ACCEPT / REVISE / FALLBACK; loops back to planner on REVISE (max 3×) |
+| `audit` | Returns ACCEPT / REVISE / FALLBACK; loops back to planner on REVISE |
 
 ## Setup
 
 ```bash
-pip install -e ".[dev]"
-export ANTHROPIC_API_KEY=...
+python -m venv .venv
+# Windows
+.venv\Scripts\pip install -e ".[dev]"
+# macOS / Linux
+.venv/bin/pip install -e ".[dev]"
+```
+
+Create a `.env` file (never committed):
+```
+OPENAI_API_KEY=sk-...
 ```
 
 ## Run
 
 ```bash
-python example.py
+# Windows
+$env:OPENAI_API_KEY = "sk-..."
+.venv\Scripts\python example.py
+
+# macOS / Linux
+OPENAI_API_KEY=sk-... .venv/bin/python example.py
 ```
 
 ## Structure
@@ -42,7 +55,7 @@ ts_agent/
 ├── graph.py                # StateGraph definition and compilation
 ├── nodes/
 │   ├── router.py           # Intent-aware routing + direct QA handler
-│   ├── prior.py            # Contextual Prior Agent (3 sub-components)
+│   ├── prior.py            # Contextual Prior Agent (profiler → archetype bank → advisor)
 │   ├── planner.py          # Temporal program synthesis
 │   ├── executor.py         # Tool library execution
 │   └── audit.py            # Audit + fallback
@@ -50,15 +63,15 @@ ts_agent/
 │   └── library.py          # Hist reconditioning, forecast stub, future enforcement ops
 └── archetype_bank/
     ├── retrieval.py        # Bi-modal DTW + semantic retrieval via RRF
-    └── bank.json           # Populate from TS-RAG medoid data to activate retrieval
+    └── bank.json           # Populate with medoid data to activate archetype retrieval
 ```
 
 ## Status
 
 - [x] Full graph wiring and typed state
-- [x] All five agent nodes with LLM structured output
+- [x] All five agent nodes with LLM structured output (gpt-4o)
 - [x] Tool library (clip, impute, scale, trend, event spike/dip ops)
 - [x] Archetype bank retrieval (DTW + RRF) — active once `bank.json` is populated
 - [ ] Replace forecast stub with real foundation model (Moirai / Chronos / Lag-LLaMA)
 - [ ] Wire semantic embeddings for archetype retrieval second channel
-- [ ] Populate `bank.json` from TS-RAG medoid data
+- [ ] Populate `bank.json` with medoid data
