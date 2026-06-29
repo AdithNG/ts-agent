@@ -35,7 +35,7 @@ class _AuditOut(BaseModel):
 
 
 def run(state: TSAgentState) -> dict:
-    llm = ChatOpenAI(model=_MODEL).with_structured_output(_AuditOut)
+    llm = ChatOpenAI(model=_MODEL).with_structured_output(_AuditOut, method="function_calling")
 
     result_preview = str(state.get("execution_result", ""))[:500]
     msg = HumanMessage(

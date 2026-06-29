@@ -42,7 +42,7 @@ class _PlannerOut(BaseModel):
 
 
 def run(state: TSAgentState) -> dict:
-    llm = ChatOpenAI(model=_MODEL).with_structured_output(_PlannerOut)
+    llm = ChatOpenAI(model=_MODEL).with_structured_output(_PlannerOut, method="function_calling")
 
     archetypes_str = (
         "\n".join(f"- {a['description']}" for a in state.get("archetypes", []))

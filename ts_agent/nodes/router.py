@@ -24,7 +24,7 @@ class _RouterOut(BaseModel):
 
 
 def run(state: TSAgentState) -> dict:
-    llm = ChatOpenAI(model=_MODEL).with_structured_output(_RouterOut)
+    llm = ChatOpenAI(model=_MODEL).with_structured_output(_RouterOut, method="function_calling")
     msg = HumanMessage(
         content=f"Task: {state['task']}\nContext: {state.get('context') or 'None'}"
     )
