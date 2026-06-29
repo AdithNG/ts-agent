@@ -1,11 +1,11 @@
 """Audit Agent — validates execution result and returns ACCEPT / REVISE / FALLBACK."""
-from langchain_anthropic import ChatAnthropic
+from langchain_openai import ChatOpenAI
 from langchain_core.messages import HumanMessage, SystemMessage
 from pydantic import BaseModel
 
 from ..state import TSAgentState
 
-_MODEL = "claude-sonnet-4-6"
+_MODEL = "gpt-4o"
 
 _SYSTEM = """You are an audit agent for a time-series forecasting pipeline.
 
@@ -35,7 +35,7 @@ class _AuditOut(BaseModel):
 
 
 def run(state: TSAgentState) -> dict:
-    llm = ChatAnthropic(model=_MODEL).with_structured_output(_AuditOut)
+    llm = ChatOpenAI(model=_MODEL).with_structured_output(_AuditOut)
 
     result_preview = str(state.get("execution_result", ""))[:500]
     msg = HumanMessage(
