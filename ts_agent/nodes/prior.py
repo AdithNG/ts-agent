@@ -61,7 +61,7 @@ def run(state: TSAgentState) -> dict:
     context = state.get("context") or ""
 
     # 1. Scenario Profiler
-    profiler = ChatOpenAI(model=_MODEL).with_structured_output(_ProfilerOut)
+    profiler = ChatOpenAI(model=_MODEL).with_structured_output(_ProfilerOut, method="function_calling")
     p_msg = HumanMessage(content=f"Task: {task}\nContext: {context}")
     profile: _ProfilerOut = profiler.invoke([SystemMessage(content=_PROFILER_SYSTEM), p_msg])
 
@@ -69,7 +69,7 @@ def run(state: TSAgentState) -> dict:
     archetypes = retrieve_archetypes(state["series"], context, k=3)
 
     # 3. Intervention Advisor
-    advisor = ChatOpenAI(model=_MODEL).with_structured_output(_AdvisorOut)
+    advisor = ChatOpenAI(model=_MODEL).with_structured_output(_AdvisorOut, method="function_calling")
     archetype_str = "\n".join(f"- {a['description']}" for a in archetypes) or "None available."
     a_msg = HumanMessage(
         content=(
