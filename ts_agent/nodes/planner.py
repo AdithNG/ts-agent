@@ -1,11 +1,11 @@
 """Unified Planner — synthesizes a temporal program Π = (Πhist, Πfm, Πfuture)."""
-from langchain_anthropic import ChatAnthropic
+from langchain_openai import ChatOpenAI
 from langchain_core.messages import HumanMessage, SystemMessage
 from pydantic import BaseModel
 
 from ..state import TSAgentState
 
-_MODEL = "claude-sonnet-4-6"
+_MODEL = "gpt-4o"
 
 _SYSTEM = """You are a temporal program synthesizer for a time-series forecasting agent.
 
@@ -42,7 +42,7 @@ class _PlannerOut(BaseModel):
 
 
 def run(state: TSAgentState) -> dict:
-    llm = ChatAnthropic(model=_MODEL).with_structured_output(_PlannerOut)
+    llm = ChatOpenAI(model=_MODEL).with_structured_output(_PlannerOut)
 
     archetypes_str = (
         "\n".join(f"- {a['description']}" for a in state.get("archetypes", []))

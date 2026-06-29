@@ -3,14 +3,14 @@
   2. Temporal Archetype Bank     → bi-modal retrieval (shape + semantic, RRF)
   3. Intervention Advisor        → predicts hist / future / both / none
 """
-from langchain_anthropic import ChatAnthropic
+from langchain_openai import ChatOpenAI
 from langchain_core.messages import HumanMessage, SystemMessage
 from pydantic import BaseModel
 
 from ..state import TSAgentState
 from ..archetype_bank.retrieval import retrieve_archetypes
 
-_MODEL = "claude-sonnet-4-6"
+_MODEL = "gpt-4o"
 
 _SCENARIO_TYPES = (
     "AddFutureConstraint",
@@ -61,7 +61,7 @@ def run(state: TSAgentState) -> dict:
     context = state.get("context") or ""
 
     # 1. Scenario Profiler
-    profiler = ChatAnthropic(model=_MODEL).with_structured_output(_ProfilerOut)
+    profiler = ChatOpenAI(model=_MODEL).with_structured_output(_ProfilerOut)
     p_msg = HumanMessage(content=f"Task: {task}\nContext: {context}")
     profile: _ProfilerOut = profiler.invoke([SystemMessage(content=_PROFILER_SYSTEM), p_msg])
 
@@ -69,7 +69,7 @@ def run(state: TSAgentState) -> dict:
     archetypes = retrieve_archetypes(state["series"], context, k=3)
 
     # 3. Intervention Advisor
-    advisor = ChatAnthropic(model=_MODEL).with_structured_output(_AdvisorOut)
+    advisor = ChatOpenAI(model=_MODEL).with_structured_output(_AdvisorOut)
     archetype_str = "\n".join(f"- {a['description']}" for a in archetypes) or "None available."
     a_msg = HumanMessage(
         content=(

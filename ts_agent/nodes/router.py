@@ -1,10 +1,10 @@
-from langchain_anthropic import ChatAnthropic
+from langchain_openai import ChatOpenAI
 from langchain_core.messages import HumanMessage, SystemMessage
 from pydantic import BaseModel
 
 from ..state import TSAgentState
 
-_MODEL = "claude-sonnet-4-6"
+_MODEL = "gpt-4o"
 
 _ROUTER_SYSTEM = """You are an intent-aware router for a time-series agent.
 
@@ -24,7 +24,7 @@ class _RouterOut(BaseModel):
 
 
 def run(state: TSAgentState) -> dict:
-    llm = ChatAnthropic(model=_MODEL).with_structured_output(_RouterOut)
+    llm = ChatOpenAI(model=_MODEL).with_structured_output(_RouterOut)
     msg = HumanMessage(
         content=f"Task: {state['task']}\nContext: {state.get('context') or 'None'}"
     )
@@ -41,7 +41,7 @@ _QA_SYSTEM = "Answer the question directly from the provided time series and con
 
 def run_qa(state: TSAgentState) -> dict:
     """Direct path for self-contained QA tasks that need no contextual intervention."""
-    llm = ChatAnthropic(model=_MODEL)
+    llm = ChatOpenAI(model=_MODEL)
     series_snippet = ", ".join(str(v) for v in state["series"][:50])
     msg = HumanMessage(
         content=(
