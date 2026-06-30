@@ -6,11 +6,31 @@ A LangGraph implementation of the ECLIPSE multi-agent pipeline for context-rich 
 
 Five agents wired as a `StateGraph`, matching the ECLIPSE paper:
 
-```
-START → router → contextual_prior → planner → executor → audit → END
-                                        ↑________________________| (REVISE, max 3×)
-         ↓ (self-contained QA)
-       qa_direct → END
+```mermaid
+flowchart TD
+    START([START]) --> router
+
+    router -->|knowledge-augmented forecast| contextual_prior
+    router -->|self-contained QA| qa_direct
+
+    contextual_prior --> planner
+    planner --> executor
+    executor --> audit
+
+    audit -->|ACCEPT| END([END])
+    audit -->|REVISE ≤ 3×| planner
+    audit -->|FALLBACK| fallback
+
+    qa_direct --> END
+    fallback --> END
+
+    router["🔀 router\nIntent-Aware Router"]
+    contextual_prior["🧠 contextual_prior\nScenario Profiler → Archetype Bank → Intervention Advisor"]
+    planner["📋 planner\nTemporal Program Synthesizer"]
+    executor["⚙️ executor\nTool Library Executor"]
+    audit["🔍 audit\nAudit Agent"]
+    qa_direct["💬 qa_direct\nDirect QA Handler"]
+    fallback["⚠️ fallback\nNaive Baseline"]
 ```
 
 | Node | Role |
